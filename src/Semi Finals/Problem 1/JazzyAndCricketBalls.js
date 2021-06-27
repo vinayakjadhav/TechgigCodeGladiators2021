@@ -5,7 +5,7 @@ var input_stdin = "";
 var input_stdin_array = "";
 var input_currentline = 0;
 var output = [];
-var cache = [];
+var cache = {};
 process.stdin.on('data', function(data) {
   input_stdin += data;
 });
@@ -14,68 +14,72 @@ process.stdin.on('end', function() {
   var packets;
   var subSequences;
   input_stdin_array = input_stdin.split("\r\n");
-  // console.log(input_stdin_array)
-
+  // /// console.log(input_stdin_array)
+  const started = Date.now();
   //Write code here
   var noOfPackets = input_stdin_array[0];
   var packets = input_stdin_array[1].split(" ").map(a => +a);
 
-  console.log("noOfPackets ", noOfPackets);
-  console.log("packets ", packets);
+  /// console.log("noOfPackets ", noOfPackets);
+  /// console.log("packets ", packets);
 
   for (var i = 0; i < packets.length; i++) {
-    if (isPrimeNumber(packets[i])) {
-      output[i] = 1 + packets[i];
-    } else {
-      var plausibleGroups = getFactors(packets[i]);
-      console.log("plausibleGroups for ", packets[i], plausibleGroups);
-      output[i] = getMoves(packets[i], plausibleGroups);
-    }
+    var plausibleGroups = getFactors(packets[i]);
+    output[i] = getMoves(packets[i], plausibleGroups);
+    //  console.log("now cache  ", cache);
   }
 
   function getMoves(balls, groups) {
-    console.log("groups for ", balls, groups);
+    /// console.log("groups for ", balls, groups);
     if (groups.length == 0) {
-      console.log("groups ", groups, " returning 1 ");
-      return balls;
+      //  /// console.log("groups ", groups, " returning 1 ");
+      return 1;
     }
+    if (cache[balls]) {
+      //    console.log("cache hit ", balls, cache[balls])
+      return cache[balls];
+    }
+
     var total = 0;
-    var m = 0;
-    var a = [];
+    var m = [];
+
     for (var i = 0; i < groups.length; i++) {
-      var gp = getFactors(groups[i]);
-      if (cache[groups[i]]) {
-        a[i] = cache[groups[i]];
-      } else {
-        a[i] = (balls / groups[i]) + getMoves(groups[i], gp);
-        cache[groups[i]] = a[i];
-      }
+      let a = 1;
+      /// console.log("cache is ", cache)
+      //  for (var j = 0; j < (balls / groups[i]); j++) {
+      //    /// console.log("for j ", j)
+      let gp = getFactors(groups[i]);
+      a = a + ((balls / groups[i]) * getMoves(groups[i], gp));
+      //  console.log("now a  ", a)
+      //  }
+      //  }
+      m[i] = a; //- groups[i];
+      //    cache[groups[i]] = a;
     }
-    console.log("a ", a);
-    total += Math.max(...a);
+    //    console.log("m ", m);
+    total = Math.max(...m);
+    //    console.log("total", total);
+    cache[balls] = total;
     return total;
   }
 
   function getFactors(number) {
     var factors = [];
-    for (var i = 2; i ** 2 <= number; i++) {
+    if (number == 1) return factors;
+    for (var i = 1; i ** 2 <= number; i++) {
       if (number % i == 0) {
         factors.push(i);
-        if (number / i !== i)
+        if (number / i !== i && number / i != number)
           factors.push(number / i);
       }
     }
     return factors.sort();
   }
 
-  function isPrimeNumber(number) {
-    for (var i = 2; i ** 2 <= number; i++) {
-      if (number % i == 0) return false;
-    }
-    return number > 1;
-  }
-  console.log("output ", output);
+  /// console.log("output ", output);
   output = output.reduce((total, num) => total + Math.round(num));
-  console.log(output);
+  /// console.log(output);
   process.stdout.write("" + output + "");
+  const gone = Date.now() - started;
+  //  console.log("\n\nTime taken", gone / 1000, 's.');
 });
