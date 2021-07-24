@@ -12,7 +12,6 @@ process.stdin.on('data', function(data) {
 
 process.stdin.on('end', function() {
   var packets;
-  var subSequences;
   input_stdin_array = input_stdin.split("\r\n");
   // /// console.log(input_stdin_array)
   const started = Date.now();
@@ -31,8 +30,7 @@ process.stdin.on('end', function() {
 
   function getMoves(balls, groups) {
     /// console.log("groups for ", balls, groups);
-    if (groups.length == 0) {
-      //  /// console.log("groups ", groups, " returning 1 ");
+    if (!groups.length) {
       return 1;
     }
     if (cache[balls]) {
@@ -51,7 +49,6 @@ process.stdin.on('end', function() {
       let gp = getFactors(groups[i]);
       a = a + ((balls / groups[i]) * getMoves(groups[i], gp));
       //  console.log("now a  ", a)
-      //  }
       //  }
       m[i] = a; //- groups[i];
       //    cache[groups[i]] = a;
